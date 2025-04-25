@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capstone</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=4">
+    <!-- Add Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1><i class="fas fa-tooth"></i> Dental Analysis</h1>
+            <p class="tagline">Detect dental issues with AI-powered analysis</p>
+            
+            <!-- Add navigation bar -->
+            <nav class="navbar">
+                <ul class="nav-menu">
+                    {% if session.logged_in %}
+                        <li class="nav-item"><a href="{{ url_for('dashboard') }}" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                        <li class="nav-item"><a href="{{ url_for('index') }}" class="nav-link active"><i class="fas fa-camera"></i> Scan</a></li>
+                        <li class="nav-item"><a href="{{ url_for('toothbrush_monitor') }}" class="nav-link"><i class="fas fa-toothbrush"></i> Toothbrush Monitor</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-user"></i> {{ session.username }}</a></li>
+                        <li class="nav-item"><a href="{{ url_for('logout') }}" class="nav-link logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    {% else %}
+                        <li class="nav-item"><a href="{{ url_for('login') }}" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                        <li class="nav-item"><a href="{{ url_for('register') }}" class="nav-link"><i class="fas fa-user-plus"></i> Register</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <!-- Camera View -->
+            <div id="camera-view" class="active-screen">
+                <div class="camera-instructions-card">
+                    <h3><i class="fas fa-info-circle"></i> How to Take a Good Dental Photo</h3>
+                    <ol class="instruction-steps">
+                        <li><i class="fas fa-video"></i> Position camera in front of teeth</li>
+                        <li><i class="fas fa-lightbulb"></i> Make sure teeth are visible and well-lit</li>
+                        <li><i class="fas fa-hand-paper"></i> Hold still and click "Capture"</li>
+                    </ol>
+                </div>
+                
+                <div class="camera-container">
+                    <div class="camera-frame">
+                        <img id="preview-image" src="{{ url_for('static', filename='img/placeholder.jpg') }}" alt="Dental Camera">
+                    </div>
+                </div>
+                <div class="camera-controls">
+                    <button id="captureBtn" class="primary-btn">
+                        <i class="fas fa-camera"></i> Capture
+                    </button>
+                </div>
+            </div>
+
+            <!-- Review Photo View -->
+            <div id="review-view" class="hidden">
+                <div class="review-container">
+                    <h2>Review Your Photo</h2>
+                    <div class="photo-container">
+                        <img id="review-image" src="" alt="Captured dental image">
+                    </div>
+                    <p class="review-instructions">Is this photo clear and showing your teeth properly?</p>
+                    <div class="review-controls">
+                        <button id="retakeBtn" class="secondary-btn">
+                            <i class="fas fa-redo"></i> Retake Photo
+                        </button>
+                        <button id="analyzeBtn" class="primary-btn">
+                            <i class="fas fa-search"></i> Analyze Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading View -->
+            <div id="loading-view" class="hidden">
+                <div class="loading-animation">
+                    <div class="spinner"></div>
+                </div>
+                <p class="loading-text">Analyzing your dental health...</p>
+                <div class="loading-steps">
+                    <div class="loading-step active">Processing image</div>
+                    <div class="loading-step">Applying AI model</div>
+                    <div class="loading-step">Generating recommendations</div>
+                </div>
+            </div>
+
+            <!-- Results View -->
+            <div id="results-view" class="hidden">
+                <div class="results-header">
+                    <div id="status-indicator" class="status-indicator">
+                        <i class="status-icon"></i>
+                        <span class="status-text"></span>
+                </div>
+                <p id="primary-issue" class="primary-issue"></p>
+            </div>
+
+                <div class="results-image" style="position: relative;">
+                <!-- Image container with positioned canvas for bounding boxes -->
+                    <div style="position: relative; width: 100%; height: auto;">
+                        <img id="result-image" src="" alt="Analyzed dental image" style="width: 100%; display: block;">
+                        <canvas id="annotation-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+                    </div>
+                </div>
+
+            <div class="results-container">
+                <div class="results-panel detection-panel">
+                    <h2><i class="fas fa-search"></i> Detected Conditions</h2>
+                    <div id="detection-counts" class="detection-grid"></div>
+                </div>
+
+                <div class="results-panel recommendations-panel">
+                    <h2><i class="fas fa-clipboard-list"></i> Your Recommendations</h2>
+                    <ul id="recommendations-list" class="recommendations-list"></ul>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="new-scan-btn" class="primary-btn">
+                    <i class="fas fa-redo"></i> New Scan
+                </button>
+        
+                {% if session.logged_in %}
+                <button id="save-results-btn" class="primary-btn">
+                    <i class="fas fa-save"></i> Save Results
+                </button>
+                {% endif %}
+        </div>
+    </div>
+        </main>
+
+        <footer>
+            <p>Dental Analysis &copy; 2025</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=3"></script>
+</body>
+</html>

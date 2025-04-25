@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Dental Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=4">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1><i class="fas fa-tooth"></i> Dental Analysis </h1>
+            <p class="tagline">Detect dental issues with AI-powered analysis</p>
+
+            <!-- Navigation bar -->
+            <nav class="navbar">
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="{{ url_for('dashboard') }}" class="nav-link active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                    <li class="nav-item"><a href="{{ url_for('index') }}" class="nav-link"><i class="fas fa-camera"></i> Scan</a></li>
+                    <li class="nav-item"><a href="{{ url_for('toothbrush_monitor') }}" class="nav-link"><i class="fas fa-toothbrush"></i> Toothbrush Monitor</a></li>
+                    <li class="nav-item"><a href="{{ url_for('account') }}" class="nav-link"><i class="fas fa-user"></i> {{ session.username }}</a></li>
+                    <li class="nav-item"><a href="{{ url_for('logout') }}" class="nav-link logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="dashboard-container">
+                <div class="dashboard-header">
+                    <h2 class="dashboard-title">Your Dashboard</h2>
+                    <a href="{{ url_for('index') }}" class="primary-btn">
+                        <i class="fas fa-camera"></i> New Scan
+                    </a>
+                </div>
+                
+                <!-- Raspberry Pi Zero 2 W Connection Status -->
+                <div class="pi-status-indicator" id="pi-status">
+                    <div class="pi-status-icon">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <div class="pi-status-text">
+                        <h4>Raspberry Pi Zero 2 W: Checking connection...</h4>
+                        <p>Verifying if your toothbrush tracking device is online.</p>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                        <div class="stat-value">{{ stats.total_scans }}</div>
+                        <div class="stat-label">Total Scans</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="stat-value">{{ stats.last_scan }}</div>
+                        <div class="stat-label">Days Since Last Scan</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="stat-value">{{ stats.health_trend }}</div>
+                        <div class="stat-label">Health Trend</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-history"></i> Scan History</h3>
+
+                    {% if scan_history %}
+                        {% for scan in scan_history %}
+                            <div class="scan-history-item">
+                                <div class="scan-info">
+                                    <div class="scan-title">Dental Scan</div>
+                                    <div class="scan-date">{{ scan.date }}</div>
+                                </div>
+                                <div class="scan-status status-{{ scan.status_class }}">
+                                    {{ scan.status }}
+                                </div>
+
+                                <div class="scan-actions">
+                                    <a href="{{ url_for('view_scan', scan_id=scan.id) }}" class="btn-icon btn-view" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button class="btn-icon btn-delete" title="Delete Scan" data-scan-id="{{ scan.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-teeth"></i>
+                            <p>You haven't done any scans yet</p>
+                            <a href="{{ url_for('index') }}" class="primary-btn" style="margin-top: 1rem;">
+                                <i class="fas fa-camera"></i> Take Your First Scan
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-clipboard-list"></i> Recommendations</h3>
+
+                    {% if recommendations %}
+                        <ul class="recommendations-list">
+                            {% for recommendation in recommendations %}
+                                <li>{{ recommendation }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-clipboard-check"></i>
+                            <p>No recommendations yet</p>
+                            <p>Complete a scan to get personalized dental care advice</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Dental Analysis &copy; 2025</p>
+        </footer>
+    </div>
+
+    <!-- Load the external JS file -->
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=2"></script>
+</body>

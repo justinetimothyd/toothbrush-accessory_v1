@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DentalAI Brushing Monitor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0066cc;
+            --success: #00aa00;
+            --warning: #cc6600;
+            --danger: #cc3300;
+            --gray: #f3f3f3;
+            --dark-gray: #666;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--gray);
+            color: #333;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .site-title {
+            color: var(--primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+        }
+        
+        .tooth-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            color: var(--primary);
+        }
+        
+        .site-subtitle {
+            color: var(--dark-gray);
+            margin: 5px 0 0 34px;
+            font-size: 14px;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+            background-color: var(--danger);
+        }
+        
+        .status-online {
+            background-color: var(--success);
+        }
+        
+        .status-offline {
+            background-color: var(--danger);
+        }
+        
+        /* Navigation bar styles */
+        .navbar {
+            background-color: var(--primary);
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            justify-content: space-around;
+        }
+        
+        .nav-item {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .nav-link {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 12px 15px;
+            transition: background-color 0.3s ease;
+            border-radius: 5px;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+        
+        .nav-link i {
+            margin-right: 5px;
+        }
+        
+        .logout-link {
+            color: #ffcccc;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: #0052a3;
+        }
+        
+        button.outline {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        button.outline:hover {
+            background-color: rgba(0, 102, 204, 0.1);
+        }
+        
+        button.outline.danger {
+            background-color: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+        
+        button.outline.danger:hover {
+            background-color: rgba(204, 51, 0, 0.1);
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card h2 {
+            color: var(--primary);
+            margin-top: 0;
+            border-bottom: 1px solid var(--gray);
+            padding-bottom: 10px;
+        }
+        
+        .device-info {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .info-item {
+            flex: 1;
+            min-width: 200px;
+            margin: 10px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: var(--dark-gray);
+        }
+        
+        .tooth-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .tooth-section {
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            min-height: 100px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tooth-section.active {
+            border-color: var(--primary);
+            background-color: rgba(0, 102, 204, 0.1);
+        }
+        
+        .tooth-section.completed {
+            background-color: rgba(0, 170, 0, 0.1);
+        }
+        
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .progress-container {
+            height: 10px;
+            background-color: #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            transition: width 0.5s ease;
+        }
+        
+        .tooth-layout {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        
+        .tooth-layout img {
+            max-width: 50px;
+            max-height: 50px;
+        }
+        
+        .status-panel {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .status-box {
+            flex: 1;
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 5px;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .status-box h3 {
+            margin-top: 0;
+            font-size: 16px;
+            color: var(--dark-gray);
+        }
+        
+        .status-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            margin: 5px;
+        }
+        
+        .button:hover {
+            background-color: #0052a3;
+        }
+        
+        .button.danger {
+            background-color: var(--danger);
+        }
+        
+        .button.danger:hover {
+            background-color: #aa2200;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .timer {
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            color: var(--primary);
+        }
+        
+        .timer.warning {
+            color: var(--warning);
+        }
+        
+        .timer.danger {
+            color: var(--danger);
+        }
+        
+        .animation-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .status-message {
+            text-align: center;
+            font-size: 18px;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .status-message.info {
+            background-color: rgba(0, 102, 204, 0.1);
+            color: var(--primary);
+        }
+        
+        .status-message.success {
+            background-color: rgba(0, 170, 0, 0.1);
+            color: var(--success);
+        }
+        
+        .status-message.warning {
+            background-color: rgba(204, 102, 0, 0.1);
+            color: var(--warning);
+        }
+        
+        .connection-form {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .device-info {
+                flex-direction: column;
+            }
+            
+            .tooth-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .nav-menu {
+                flex-wrap: wrap;
+            }
+            
+            .nav-item {
+                flex-basis: 50%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .tooth-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-panel {
+                flex-direction: column;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header-right {
+                margin-top: 15px;
+            }
+            
+            .site-subtitle {
+                margin: 5px 0 0 0;
+            }
+            
+            .nav-item {
+                flex-basis: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div>
+                    <h1 class="site-title">
+                        <svg class="tooth-icon" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M256,0C167.6,0,96,71.6,96,160c0,24.8,5.6,48.4,15.6,69.6l142.9,279.2c2.5,5,7.8,8.2,13.5,8.2s11-3.2,13.5-8.2 l142.9-279.2C434.4,208.4,440,184.8,440,160C440,71.6,368.4,0,280,0H256z M378.2,214.8L256,450.7L133.8,214.8 C125.8,197.6,120,179.2,120,160c0-75.1,60.9-136,136-136h24c68.2,0,124.7,50.9,134.6,116.7c2.1,14.1,2.9,28.7,1.6,42.9 C414.5,194.2,408.9,204.8,378.2,214.8z" fill="currentColor"/>
+                        </svg>
+                        DentalAI Brushing Monitor
+                    </h1>
+                    <p class="site-subtitle">Track and improve your brushing habits</p>
+                </div>
+                <div class="header-right">
+                    <div class="connection-status">
+                        <div class="status-indicator" id="connectionIndicator"></div>
+                        <span id="connectionStatus">Disconnected</span>
+                    </div>
+                    <button class="outline" id="settingsBtn">Settings</button>
+                </div>
+            </div>
+            
+            <!-- Navigation bar -->
+            <nav class="navbar">
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="/dashboard" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                    <li class="nav-item"><a href="{{ url_for('index') }}" class="nav-link"><i class="fas fa-camera"></i> Scan</a></li> 
+                    <li class="nav-item"><a href="/toothbrush-monitor" class="nav-link active"><i class="fas fa-toothbrush"></i> Toothbrush Monitor</a></li>
+                    <li class="nav-item"><a href="/account" class="nav-link"><i class="fas fa-user"></i> Account</a></li>
+                    <li class="nav-item"><a href="/logout" class="nav-link logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <div class="card" id="connectionCard">
+            <h2>Connect to Your Toothbrush</h2>
+            <div class="connection-form">
+                <div class="form-group">
+                    <label for="deviceAddress">Device IP Address</label>
+                    <input type="text" id="deviceAddress" placeholder="Enter ESP32 IP address" value="192.168.4.1">
+                </div>
+                <div class="button-group">
+                    <button class="button" id="connectButton">Connect</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card hidden" id="deviceCard">
+            <h2>Device Information</h2>
+            <div class="device-info">
+                <div class="info-item">
+                    <div class="info-label">Connection Status</div>
+                    <div id="deviceStatus">Unknown</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">IP Address</div>
+                    <div id="deviceIP">Unknown</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Signal Strength</div>
+                    <div id="deviceSignal">Unknown</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Current Position</div>
+                    <div id="currentPosition">Unknown</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card hidden" id="brushingCard">
+            <h2>Brushing Session</h2>
+            
+            <div class="status-panel">
+                <div class="status-box">
+                    <h3>Status</h3>
+                    <div class="status-value" id="brushingStatus">Inactive</div>
+                </div>
+                <div class="status-box">
+                    <h3>Total Time</h3>
+                    <div class="status-value" id="totalTime">0s</div>
+                </div>
+                <div class="status-box">
+                    <h3>Completed Areas</h3>
+                    <div class="status-value" id="completedAreas">0/9</div>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="button" id="startButton">Start Brushing</button>
+                <button class="button danger" id="resetButton">Reset Progress</button>
+                <button class="button outline danger" id="disconnectButton">Disconnect</button>
+            </div>
+            
+            <div class="status-message info hidden" id="brushingMessage">
+                Brush the highlighted section
+            </div>
+            
+            <h3>Brushing Progress</h3>
+            <div class="tooth-grid" id="toothGrid">
+                <!-- Tooth sections will be generated via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const TARGET_BRUSHING_TIME = 15; // 15 seconds per position
+        const REFRESH_INTERVAL = 1000; // Refresh data every second
+        const DEFAULT_IP = "192.168.4.1"; // Default ESP32 IP in AP mode
+        const VM_URL = "http://34.92.40.219:5000"; // VM server URL
+        
+        // Position definitions with friendly names
+        const positions = [
+            { id: 0, name: "UPPER_FRONT", display: "Upper Front" },
+            { id: 1, name: "UPPER_LEFT", display: "Upper Left" },
+            { id: 2, name: "UPPER_RIGHT", display: "Upper Right" },
+            { id: 3, name: "LOWER_FRONT", display: "Lower Front" },
+            { id: 4, name: "LOWER_LEFT", display: "Lower Left" },
+            { id: 5, name: "LOWER_RIGHT", display: "Lower Right" },
+            { id: 6, name: "FRONT_MIDDLE", display: "Front Middle" },
+            { id: 7, name: "FRONT_LEFT", display: "Front Left" },
+            { id: 8, name: "FRONT_RIGHT", display: "Front Right" }
+        ];
+        
+        // Elements
+        const elements = {
+            connectionStatus: document.getElementById('connectionStatus'),
+            connectionIndicator: document.getElementById('connectionIndicator'),
+            deviceAddress: document.getElementById('deviceAddress'),
+            connectButton: document.getElementById('connectButton'),
+            disconnectButton: document.getElementById('disconnectButton'),
+            connectionCard: document.getElementById('connectionCard'),
+            deviceCard: document.getElementById('deviceCard'),
+            brushingCard: document.getElementById('brushingCard'),
+            deviceStatus: document.getElementById('deviceStatus'),
+            deviceIP: document.getElementById('deviceIP'),
+            deviceSignal: document.getElementById('deviceSignal'),
+            currentPosition: document.getElementById('currentPosition'),
+            brushingStatus: document.getElementById('brushingStatus'),
+            totalTime: document.getElementById('totalTime'),
+            completedAreas: document.getElementById('completedAreas'),
+            startButton: document.getElementById('startButton'),
+            resetButton: document.getElementById('resetButton'),
+            brushingMessage: document.getElementById('brushingMessage'),
+            toothGrid: document.getElementById('toothGrid')
+        };
+        
+        // State
+        let state = {
+            connected: false,
+            deviceIP: '',
+            refreshTimer: null,
+            currentPosition: -1,
+            brushingActive: false,
+            brushingPaused: false,
+            positionProgress: Array(9).fill(0),
+            totalSeconds: 0,
+            completedPositions: 0
+        };
+        
+        // Initialize the tooth grid
+        function initToothGrid() {
+            elements.toothGrid.innerHTML = '';
+            
+            positions.forEach(position => {
+                const section = document.createElement('div');
+                section.className = 'tooth-section';
+                section.id = `section-${position.id}`;
+                
+                section.innerHTML = `
+                    <div class="section-title">${position.display}</div>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progress-${position.id}" style="width: 0%"></div>
+                    </div>
+                    <div class="time-display" id="time-${position.id}">0s / ${TARGET_BRUSHING_TIME}s</div>
+                `;
+                
+                elements.toothGrid.appendChild(section);
+            });
+        }
+        
+        // Connect to the ESP32
+        async function connectToDevice() {
+            const ipAddress = elements.deviceAddress.value || DEFAULT_IP;
+            state.deviceIP = ipAddress;
+            
+            // Disable connect button while connecting
+            elements.connectButton.disabled = true;
+            
+            try {
+                // Test connection with a simple health check
+                const response = await fetch(`http://${ipAddress}/health`, { 
+                    timeout: 5000,
+                    headers: {
+                        'Accept': 'text/plain'
+                    }
+                });
+                
+                if (response.ok) {
+                    updateConnectionStatus(true);
+                    showDeviceInfo();
+                    startDataRefresh();
+                } else {
+                    throw new Error('Device responded with an error');
+                }
+            } catch (error) {
+                console.error('Connection failed:', error);
+                updateConnectionStatus(false);
+                alert('Failed to connect to device. Please check the IP address and try again.');
+            } finally {
+                elements.connectButton.disabled = false;
+            }
+        }
+        
+        // Disconnect from the ESP32
+        function disconnectFromDevice() {
+            if (state.refreshTimer) {
+                clearInterval(state.refreshTimer);
+                state.refreshTimer = null;
+            }
+            
+            updateConnectionStatus(false);
+            state.connected = false;
+            state.deviceIP = '';
+            
+            // Hide device and brushing cards
+            elements.deviceCard.classList.add('hidden');
+            elements.brushingCard.classList.add('hidden');
+            
+            // Show connection card
+            elements.connectionCard.classList.remove('hidden');
+        }
+        
+        // Update connection status indicator
+        function updateConnectionStatus(connected) {
+            state.connected = connected;
+            
+            if (connected) {
+                elements.connectionIndicator.className = 'status-indicator status-online';
+                elements.connectionStatus.textContent = 'Connected';
+            } else {
+                elements.connectionIndicator.className = 'status-indicator status-offline';
+                elements.connectionStatus.textContent = 'Disconnected';
+                
+                if (state.refreshTimer) {
+                    clearInterval(state.refreshTimer);
+                    state.refreshTimer = null;
+                }
+            }
+        }
+        
+        // Show device info and brushing cards after connection
+        function showDeviceInfo() {
+            elements.connectionCard.classList.add('hidden');
+            elements.deviceCard.classList.remove('hidden');
+            elements.brushingCard.classList.remove('hidden');
+            
+            // Initialize tooth grid
+            initToothGrid();
+        }
+        
+        // Start periodic data refresh
+        function startDataRefresh() {
+            if (state.refreshTimer) {
+                clearInterval(state.refreshTimer);
+            }
+            
+            // Get initial data
+            refreshData();
+            
+            // Set up interval for refreshing
+            state.refreshTimer = setInterval(refreshData, REFRESH_INTERVAL);
+        }
+        
+        // Refresh data from the ESP32
+        async function refreshData() {
+            if (!state.connected) return;
+            
+            try {
+                // Get status info
+                const statusResponse = await fetch(`http://${state.deviceIP}/status`);
+                if (statusResponse.ok) {
+                    const statusData = await statusResponse.json();
+                    updateDeviceInfo(statusData);
+                }
+                
+                // Get brushing progress
+                const progressResponse = await fetch(`http://${state.deviceIP}/brushing-progress`);
+                if (progressResponse.ok) {
+                    const progressData = await progressResponse.json();
+                    updateBrushingProgress(progressData);
+                }
+            } catch (error) {
+                console.error('Failed to refresh data:', error);
+                if (state.connected) {
+                    // If we were previously connected, try a few times before marking disconnected
+                    state.connectionFailures = (state.connectionFailures || 0) + 1;
+                    
+                    if (state.connectionFailures > 3) {
+                        updateConnectionStatus(false);
+                    }
+                }
+            }
+        }
+        
+        // Update device information
+        function updateDeviceInfo(data) {
+            state.connectionFailures = 0; // Reset failure counter on successful update
+            
+            if (data.mode) {
+                elements.deviceStatus.textContent = data.mode;
+            }
+            
+            if (data.ip_address) {
+                elements.deviceIP.textContent = data.ip_address;
+            } else if (data.ap_ip) {
+                elements.deviceIP.textContent = data.ap_ip + ' (AP)';
+            }
+            
+            if (data.rssi) {
+                elements.deviceSignal.textContent = data.rssi + ' dBm';
+            }
+            
+            if (data.current_position) {
+                elements.currentPosition.textContent = data.current_position;
+                
+                // Find position ID by name
+                const position = positions.find(p => p.name === data.current_position);
+                if (position) {
+                    state.currentPosition = position.id;
+                    updateActivePosition(position.id);
+                }
+            }
+            
+            // Update brushing status
+            state.brushingActive = data.brushing_active;
+            state.brushingPaused = data.brushing_paused;
+            
+            updateBrushingStatus();
+        }
+        
+        // Update brushing progress display
+        function updateBrushingProgress(data) {
+            // Update status
+            state.brushingActive = data.session_active;
+            state.brushingPaused = data.brushing_paused;
+            
+            // Update total time
+            state.totalSeconds = data.total_brushing_seconds || 0;
+            elements.totalTime.textContent = `${state.totalSeconds}s`;
+            
+            // Count completed positions
+            state.completedPositions = 0;
+            
+            // Update individual position progress
+            if (data.positions && Array.isArray(data.positions)) {
+                data.positions.forEach(position => {
+                    const id = position.index;
+                    const progressEl = document.getElementById(`progress-${id}`);
+                    const timeEl = document.getElementById(`time-${id}`);
+                    const sectionEl = document.getElementById(`section-${id}`);
+                    
+                    if (progressEl && timeEl && sectionEl) {
+                        // Update progress bar
+                        const progress = position.progress || 0;
+                        progressEl.style.width = `${progress}%`;
+                        
+                        // Update time display
+                        const seconds = Math.floor((position.time || 0) / 1000);
+                        timeEl.textContent = `${seconds}s / ${TARGET_BRUSHING_TIME}s`;
+                        
+                        // Check if completed
+                        if (progress >= 100) {
+                            state.completedPositions++;
+                            sectionEl.classList.add('completed');
+                        } else {
+                            sectionEl.classList.remove('completed');
+                        }
+                        
+                        // Store progress in state
+                        state.positionProgress[id] = progress;
+                    }
+                });
+            }
+            
+            // Update completed areas count
+            elements.completedAreas.textContent = `${state.completedPositions}/9`;
+            
+            // Update brushing status
+            updateBrushingStatus();
+        }
+        
+        // Update which position is active
+        function updateActivePosition(positionId) {
+            // Remove active class from all sections
+            document.querySelectorAll('.tooth-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Add active class to current position
+            const currentSection = document.getElementById(`section-${positionId}`);
+            if (currentSection) {
+                currentSection.classList.add('active');
+            }
+        }
+        
+        // Update brushing status display
+        function updateBrushingStatus() {
+            let status = 'Inactive';
+            elements.brushingMessage.classList.add('hidden');
+            
+            if (state.brushingActive) {
+                if (state.brushingPaused) {
+                    status = 'Paused';
+                    elements.brushingMessage.textContent = 'Brushing paused - keep moving the brush';
+                    elements.brushingMessage.className = 'status-message warning';
+                    elements.brushingMessage.classList.remove('hidden');
+                } else {
+                    status = 'Active';
+                    
+                    if (state.currentPosition >= 0) {
+                        const position = positions.find(p => p.id === state.currentPosition);
+                        if (position) {
+                            elements.brushingMessage.textContent = `Brush the ${position.display} section`;
+                            elements.brushingMessage.className = 'status-message info';
+                            elements.brushingMessage.classList.remove('hidden');
+                        }
+                    }
+                }
+            }
+            
+            elements.brushingStatus.textContent = status;
+            elements.startButton.textContent = state.brushingActive ? 'Stop Brushing' : 'Start Brushing';
+            
+            // Show completion message if all positions completed
+            if (state.completedPositions === 9) {
+                elements.brushingMessage.textContent = 'Great job! All sections completed!';
+                elements.brushingMessage.className = 'status-message success';
+                elements.brushingMessage.classList.remove('hidden');
+            }
+        }
+        
+        // Toggle brushing session
+        async function toggleBrushingSession() {
+            if (!state.connected) return;
+            
+            try {
+                await fetch(`http://${state.deviceIP}/toggle-brushing`);
+                // The next refresh will update the UI
+            } catch (error) {
+                console.error('Failed to toggle brushing:', error);
+                alert('Failed to communicate with the device. Please check your connection.');
+            }
+        }
+        
+        // Reset brushing progress
+        async function resetBrushingProgress() {
+            if (!state.connected) return;
+            
+            if (confirm('Are you sure you want to reset all brushing progress?')) {
+                try {
+                    await fetch(`http://${state.deviceIP}/reset-progress`);
+                    // The next refresh will update the UI
+                } catch (error) {
+                    console.error('Failed to reset progress:', error);
+                    alert('Failed to communicate with the device. Please check your connection.');
+                }
+            }
+        }
+        
+        // Settings button functionality
+        document.getElementById('settingsBtn').addEventListener('click', function() {
+            alert('Settings panel coming soon!');
+        });
+        
+        // Event listeners
+        elements.connectButton.addEventListener('click', connectToDevice);
+        elements.disconnectButton.addEventListener('click', disconnectFromDevice);
+        elements.startButton.addEventListener('click', toggleBrushingSession);
+        elements.resetButton.addEventListener('click', resetBrushingProgress);
+        
+        // Function to report status back to VM server
+        async function reportStatusToVM() {
+            if (!state.connected) return;
+            
+            try {
+                const statusData = {
+                    deviceIP: state.deviceIP,
+                    connected: state.connected,
+                    brushingActive: state.brushingActive,
+                    brushingPaused: state.brushingPaused,
+                    currentPosition: state.currentPosition >= 0 ? positions[state.currentPosition].name : 'UNKNOWN',
+                    totalSeconds: state.totalSeconds,
+                    completedPositions: state.completedPositions,
+                    positionProgress: state.positionProgress,
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Send data to VM server
+                await fetch(`${VM_URL}/update-status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(statusData)
+                });
+            } catch (error) {
+                console.error('Failed to report status to VM:', error);
+                // Don't alert here as this is a background operation
+            }
+        }
+        
+        // Set up VM reporting interval
+        setInterval(reportStatusToVM, 5000);
+        
+        // Initialize with default values
+        window.addEventListener('load', () => {
+            // Auto-connect if IP is in URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const ipParam = urlParams.get('ip');
+            if (ipParam) {
+                elements.deviceAddress.value = ipParam;
+                connectToDevice();
+            }
+        });
+    </script>
+</body>
